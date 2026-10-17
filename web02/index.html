@@ -1,0 +1,335 @@
+<!-- V4.0母模板：视觉样式继承V3.0确认版完整示例；图片仅作模板预览。 -->
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=750">
+
+<script>
+/**
+ * 自动图片格式兼容机制 (Auto Image Extension Fallback)
+ * 当图片加载失败（例如 HTML 写的是 .png 但本地放的是 .jpg，或者反之）时，
+ * 会自动尝试轮询 [.png, .jpg, .jpeg, .webp]，只要文件名相同即可自动显示！
+ */
+(function() {
+  var exts = ['png', 'jpg', 'jpeg', 'webp'];
+
+  window.addEventListener('error', function(e) {
+    var target = e.target;
+    if (!target || target.tagName !== 'IMG') return;
+    var src = target.getAttribute('src');
+    if (!src) return;
+
+    var match = src.match(/^([^?#]+)\.(png|jpe?g|webp)([?#].*)?$/i);
+    if (!match) return;
+
+    var basePath = match[1];
+    var currentExt = match[2].toLowerCase();
+    var extra = match[3] || '';
+
+    var tried = target.dataset.triedExts ? target.dataset.triedExts.split(',') : [currentExt];
+
+    var nextExt = null;
+    for (var i = 0; i < exts.length; i++) {
+      if (tried.indexOf(exts[i]) === -1) {
+        nextExt = exts[i];
+        break;
+      }
+    }
+
+    if (nextExt) {
+      tried.push(nextExt);
+      target.dataset.triedExts = tried.join(',');
+      target.src = basePath + '.' + nextExt + extra;
+    }
+  }, true);
+
+  // 兼顾 CSS 背景图（如 .brand-hero）的后缀自动容错
+  document.addEventListener('DOMContentLoaded', function() {
+    var bgElements = document.querySelectorAll('.brand-hero, [style*="background"]');
+    bgElements.forEach(function(el) {
+      var bg = window.getComputedStyle(el).backgroundImage;
+      if (!bg || bg === 'none') return;
+      var match = bg.match(/url\(["']?([^"')]+)["']?\)/);
+      if (!match) return;
+      var url = match[1];
+      var extMatch = url.match(/^([^?#]+)\.(png|jpe?g|webp)([?#].*)?$/i);
+      if (!extMatch) return;
+
+      var basePath = extMatch[1];
+      var currentExt = extMatch[2].toLowerCase();
+      var extra = extMatch[3] || '';
+
+      var testImg = new Image();
+      testImg.onerror = function() {
+        var tryNext = function(idx) {
+          if (idx >= exts.length) return;
+          var nextExt = exts[idx];
+          if (nextExt === currentExt) {
+            tryNext(idx + 1);
+            return;
+          }
+          var nextImg = new Image();
+          nextImg.onload = function() {
+            el.style.backgroundImage = 'url("' + basePath + '.' + nextExt + extra + '")';
+          };
+          nextImg.onerror = function() {
+            tryNext(idx + 1);
+          };
+          nextImg.src = basePath + '.' + nextExt + extra;
+        };
+        tryNext(0);
+      };
+      testImg.src = url;
+    });
+  });
+})();
+</script>
+
+<title>喜饰商品详情页母模板｜2 SKU</title>
+<style>
+:root{--tb:#ff5000;--tb2:#ff7a00;--red:#ff1648;--ink:#222;--sub:#777;--line:#eee;--bg:#f5f5f5;--ivory:#f2e9dc;--almond:#cdb7a2;--taupe:#ae9076;--cocoa:#3f2c27;--gold:#c5a872;--white:#fffcf8;--font-body:"Noto Sans SC","Microsoft YaHei",sans-serif;--font-display:"Noto Serif SC","Source Han Serif SC","SimSun",serif;--font-latin:"Noto Sans SC",Arial,sans-serif}
+*{box-sizing:border-box}html,body{margin:0;background:#d9d9d9;color:var(--ink);font-family:var(--font-body)}.app{width:min(750px,100vw);margin:auto;background:var(--bg);min-height:100vh;box-shadow:0 0 40px #0002;position:relative}.safe{height:34px;background:#fff}.appbar{height:76px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:absolute;top:34px;left:0;right:0;z-index:20;background:linear-gradient(#ffffffdd,#ffffff44)}.round{width:48px;height:48px;border-radius:50%;background:#0008;color:#fff;display:grid;place-items:center;font-size:27px}.appbar-right{display:flex;gap:14px}.gallery{height:750px;position:relative;background:#fff;overflow:hidden}.slides{display:flex;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}.slides::-webkit-scrollbar{display:none}.slide{flex:0 0 100%;height:100%;scroll-snap-align:start}.slide img{width:100%;height:100%;object-fit:cover}.slide.cover img{object-fit:contain;background:#fff}.counter{position:absolute;right:24px;bottom:24px;padding:8px 18px;border-radius:30px;background:#0008;color:#fff;font-size:20px}.product-info{background:#fff;padding:24px 26px 28px}.price-line{display:flex;align-items:flex-end;gap:10px;color:var(--red)}.yen{font-size:28px;font-weight:800;margin-bottom:5px}.price{font-size:54px;line-height:1;font-weight:800}.after{font-size:20px;background:#ffe8ee;padding:6px 10px;border-radius:5px;margin-bottom:4px}.subprice{margin:10px 0 0;color:#999;font-size:19px;text-decoration:line-through}.title{font-size:29px;line-height:1.48;font-weight:700;margin:20px 0 10px}.title-tag{background:#ffefe7;color:var(--tb);font-size:18px;padding:4px 8px;border-radius:4px;margin-right:8px}.stats{display:flex;justify-content:space-between;color:#999;font-size:19px}.panel{background:#fff;margin-top:14px;padding:0 26px}.row{min-height:76px;display:flex;align-items:center;border-bottom:1px solid var(--line);font-size:22px}.row:last-child{border-bottom:0}.label{width:78px;color:#999;font-size:20px}.row-main{flex:1}.arrow{color:#bbb;font-size:28px}.coupon{display:inline-block;border:1px solid #ff625f;color:#ff3b36;padding:5px 10px;border-radius:4px;margin-right:10px;font-size:17px}.orange{color:var(--tb)}.sku-thumb{width:64px;height:64px;border-radius:8px;object-fit:cover;margin-right:14px}.service-tags{display:flex;gap:18px;flex-wrap:wrap}.service-tags span:before{content:"✓";color:var(--tb);margin-right:5px}.review-head,.shop-head{height:82px;display:flex;align-items:center;justify-content:space-between;font-size:25px;font-weight:700}.review-card{padding:0 0 24px}.user{display:flex;align-items:center;gap:12px;font-size:20px}.avatar{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#e5d1c0,#8d6d59)}.stars{color:#ff7b00;letter-spacing:2px}.review-card p{font-size:21px;line-height:1.6;margin:14px 0 0}.shop{display:flex;align-items:center;gap:18px;padding-bottom:20px}.shop-logo{width:80px;height:80px;border:1px solid #eee;border-radius:10px;padding:10px;object-fit:contain}.shop-name{flex:1}.shop-name strong{font-size:25px}.shop-name span{display:block;color:#999;font-size:18px;margin-top:8px}.shop-btn{border:1px solid var(--tb);color:var(--tb);border-radius:28px;padding:10px 18px;font-size:19px}.detail-tabs{position:sticky;top:0;z-index:10;background:#fff;height:80px;display:flex;border-bottom:1px solid #eee;margin-top:14px}.detail-tabs a{flex:1;display:grid;place-items:center;text-decoration:none;color:#666;font-size:23px}.detail-tabs a.active{color:var(--ink);font-weight:700;position:relative}.detail-tabs a.active:after{content:"";position:absolute;bottom:0;width:48px;height:5px;border-radius:5px;background:var(--tb)}.detail-start{text-align:center;padding:32px;color:#aaa;font-size:19px}.brand-page{background:var(--white);color:var(--cocoa)}.brand-hero{height:860px;background:url('./assets/reference-preview/hero-detail-brand-v2.jpg') center/cover;position:relative}.brand-hero:after{content:none}.brand-copy{position:absolute;z-index:1;left:54px;top:64px;width:42%;color:var(--cocoa)}.en{font:20px var(--font-display);letter-spacing:7px}.brand-copy h1{font:500 58px/1.1 var(--font-display);margin:16px 0 0}.brand-copy p{max-width:290px;margin:22px 0 0;padding-top:18px;border-top:1px solid rgba(74,52,45,.35);font-size:19px;line-height:1.7;letter-spacing:.04em;color:inherit}.brand-section{padding:78px 52px}.brand-section.ivory{background:var(--ivory)}.no{font:18px var(--font-display);color:var(--taupe);letter-spacing:4px}.brand-section h2{font:500 42px var(--font-display);margin:13px 0 18px}.brand-section>p{font-size:22px;line-height:1.8;color:#75645c;margin:0 0 34px}.detail-img{display:block;width:100%}.image-note{display:flex;justify-content:space-between;color:#8b7a72;font-size:18px;padding-top:14px}.sku-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}.sku-card{background:#fff;padding:26px;border:1px solid #dfd2c6}.sku-card b{font-size:23px}.sku-card p{font-size:18px;line-height:1.6;color:#75645c;margin:8px 0}.pending{display:inline-block;padding:6px 11px;background:#fff0dd;color:#8b5d24;font-size:15px;border-radius:20px}.placeholder{height:620px;position:relative;overflow:hidden;display:grid;place-items:center;text-align:center;padding:60px;background:var(--cocoa);color:#fff}.placeholder.light{background:var(--almond);color:var(--cocoa)}.placeholder.gold{background:var(--gold);color:var(--cocoa)}.placeholder:before,.placeholder:after{content:"";position:absolute;border:1px solid currentColor;opacity:.2;border-radius:50%}.placeholder:before{width:480px;height:480px}.placeholder:after{width:330px;height:330px}.placeholder div{position:relative;z-index:1}.placeholder small{font:18px var(--font-display);letter-spacing:5px}.placeholder h3{font:500 42px var(--font-display);margin:16px 0}.placeholder p{font-size:20px;line-height:1.7;opacity:.8}.specs{display:grid;grid-template-columns:1fr 1fr;margin-top:28px;border-top:1px solid #ffffff42}.spec{padding:24px 6px;border-bottom:1px solid #ffffff42}.spec b{display:block;color:#dccbbc;font-size:17px;margin-bottom:8px}.spec span{font-size:22px}.care{display:grid;grid-template-columns:1fr 1fr;gap:12px}.care div{background:#fff;padding:24px 16px;text-align:center;border:1px solid #3f2c2715}.care b{display:block;font-size:21px;margin-bottom:7px}.care span{font-size:16px;color:#75645c}.brand-footer{background:var(--cocoa);padding:70px 30px 120px;text-align:center;color:#fff}.brand-footer img{width:210px;filter:brightness(0) invert(1)}.brand-footer p{letter-spacing:5px}.buybar{height:104px;position:sticky;bottom:0;z-index:30;background:#fff;display:flex;align-items:center;padding:12px 18px;gap:12px;box-shadow:0 -3px 12px #0001}.mini{width:76px;text-align:center;font-size:16px;color:#555}.mini i{display:block;font-style:normal;font-size:26px}.buybar button{height:70px;border:0;color:#fff;font-size:23px;font-weight:700}.cart{flex:1;border-radius:38px 0 0 38px;background:linear-gradient(90deg,#ffb000,#ff7a00)}.buy{flex:1;border-radius:0 38px 38px 0;background:linear-gradient(90deg,#ff7500,#ff3d00);margin-left:-12px}@media(max-width:540px){.safe{height:22px}.appbar{top:22px;height:58px}.gallery{height:100vw;max-height:750px}.brand-hero{height:115vw;max-height:860px}.brand-copy h1{font-size:42px}.brand-section{padding:58px 30px}.sku-cards{grid-template-columns:1fr}.placeholder{height:78vw;min-height:460px}.buybar{height:82px}.buybar button{height:58px}.mini{width:56px}.title{font-size:24px}.price{font-size:45px}}
+.gallery-dots{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);display:flex;gap:9px}.gallery-dots button{width:10px;height:10px;border:0;border-radius:50%;padding:0;background:#fff9;box-shadow:0 0 0 1px #0003}.gallery-dots button.active{width:25px;border-radius:8px;background:var(--tb)}
+.safe{height:34px;position:absolute;top:0;left:0;right:0;background:transparent;z-index:19}.appbar{background:transparent!important}.round{width:50px;height:50px;border:0;background:rgba(0,0,0,.42);box-shadow:0 1px 5px #0002;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}.round svg{width:28px;height:28px;fill:none;stroke:#fff;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+.mini{width:76px;min-width:66px;height:74px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;font-size:15px;color:#444}.mini svg{width:30px;height:30px;fill:none;stroke:#333;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.brand-page{background:#eee9e4;padding-bottom:18px}.brand-hero{width:100%;margin:0;border-radius:0;box-shadow:none}.brand-section,.placeholder{width:calc(100% - 32px);margin:16px;border-radius:24px;overflow:hidden;box-shadow:0 8px 24px rgba(63,44,39,.08)}.brand-section{background:var(--white)}.brand-footer{width:calc(100% - 32px);margin:16px;border-radius:24px;overflow:hidden;padding-bottom:90px}
+
+.brand-page{background:#eee9e4;padding-bottom:18px}.brand-hero{width:100%;margin:0;border-radius:0;box-shadow:none}.detail-module{padding:30px 16px 0}.module-head{padding:0 22px 18px}.module-head h2{font:500 42px var(--font-display);margin:11px 0 0;color:var(--cocoa)}.media-card,.detail-module>.placeholder{width:100%;margin:0;border-radius:24px;overflow:hidden;background:var(--white);box-shadow:0 8px 24px rgba(63,44,39,.08)}.media-card .detail-img{width:100%;display:block}.card-copy{margin:0;padding:22px 28px 26px;font-size:20px;line-height:1.65;color:#665750}.card-copy span{display:block;margin-top:7px;font-size:16px;color:#9a8a82}.card-copy.muted{text-align:center;color:#8b5d24;background:#fff8ee;padding:14px 20px}.short-grid{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #eee}.short-grid div{padding:20px 25px;text-align:center}.short-grid div+div{border-left:1px solid #eee}.short-grid b,.short-grid span{display:block}.short-grid b{font-size:22px}.short-grid span{font-size:17px;color:#82736c;margin-top:5px}.text-card{padding:24px}.brand-footer{width:calc(100% - 32px);margin:30px 16px 16px;border-radius:24px;overflow:hidden;padding-bottom:90px}.brand-section{box-shadow:none}
+
+.wear-grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:18px}.wear-placeholder{height:360px;border-radius:24px;background:linear-gradient(145deg,#cdb7a2,#f2e9dc);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#3f2c27;box-shadow:0 8px 24px rgba(63,44,39,.06)}.wear-placeholder.alt{background:linear-gradient(145deg,#ae9076,#eadbc8)}.wear-placeholder span{font:17px var(--font-display);letter-spacing:3px}.wear-placeholder b{font-size:24px;margin:14px 0 8px}.wear-placeholder small{font-size:16px;color:#695750}.attribute-card{display:grid;grid-template-columns:44% 56%;background:#fff;border-radius:24px;padding:28px;box-shadow:0 8px 24px rgba(63,44,39,.08);overflow:hidden}.attribute-visual{align-self:center}.attribute-visual img{width:100%;display:block}.measure{display:flex;justify-content:space-around;font-size:16px;color:#77665d}.attribute-card dl{display:grid;grid-template-columns:126px 1fr;gap:10px 12px;margin:5px 0 0}.attribute-card dt{background:#3f2c27;color:#fff;padding:9px 12px;font-size:17px}.attribute-card dd{margin:0;padding:9px 0;font-size:18px;color:#665750;border-bottom:1px dotted #cabeb4}.attribute-note{grid-column:1/-1;margin:24px 0 0;padding-top:18px;border-top:1px dotted #b8a99f;text-align:center;font-size:16px;color:#77665d}.closeup-card{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;background:#fff;border-radius:24px;padding:14px;box-shadow:0 8px 24px rgba(63,44,39,.08)}.closeup{overflow:hidden}.crop{height:300px;border-radius:16px;overflow:hidden;background:#fff;position:relative}.crop img{width:210%;height:210%;object-fit:cover;position:absolute}.crop-head img{left:-48%;top:-42%}.crop-pave img{left:-78%;top:-46%}.crop-hoop img{left:-108%;top:-50%}.closeup b{display:block;font-size:19px;margin:16px 6px 6px}.closeup span{display:block;font-size:15px;line-height:1.5;color:#8b7c74;margin:0 6px 12px}.full-image-section{width:100%;margin:30px 0 0;padding:0;background:transparent}.full-image-section img{display:block;width:100%;height:auto;border-radius:0;box-shadow:none}@media(max-width:540px){.attribute-card{grid-template-columns:1fr}.attribute-card dl{grid-template-columns:105px 1fr}.closeup-card{grid-template-columns:1fr}.crop{height:320px}.wear-placeholder{height:260px}}
+.wear-shot{border-radius:24px;overflow:hidden;background:#fff;box-shadow:0 8px 24px rgba(63,44,39,.07)}.wear-shot img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}.wear-shot p{margin:0;padding:15px 18px 18px;font-size:17px;line-height:1.5;color:#695750}.wear-shot p b{display:block;font-size:20px;color:#3f2c27;margin-bottom:4px}.magazine-card{position:relative;border-radius:24px;overflow:hidden;background:#e9ded0;box-shadow:0 8px 24px rgba(63,44,39,.08)}.magazine-card>img{display:block;width:100%;height:auto}.mag-masthead{position:absolute;left:28px;right:28px;top:24px;display:flex;align-items:flex-start;justify-content:space-between;color:#3f2c27}.mag-logo{font:700 55px/1 var(--font-display);letter-spacing:7px}.mag-issue{text-align:right;font:13px/1.45 var(--font-latin);letter-spacing:3px}.mag-kicker{position:absolute;left:30px;top:102px;color:#3f2c27;font:15px var(--font-latin);letter-spacing:5px;border-top:1px solid #3f2c27;padding-top:10px}.mag-coverline{position:absolute;left:30px;bottom:32px;width:270px;color:#fff;text-shadow:0 1px 8px #3f2c2780}.mag-coverline small{display:block;font:14px var(--font-latin);letter-spacing:5px;margin-bottom:9px}.mag-coverline strong{display:block;font:500 32px/1.08 var(--font-display);letter-spacing:1px}.mag-vertical{position:absolute;right:16px;top:170px;writing-mode:vertical-rl;color:#3f2c27;font:12px var(--font-latin);letter-spacing:5px}
+.wear-shot{position:relative}.wear-number{position:absolute;top:28px;left:30px;color:#3f2c27;font:12px var(--font-latin);letter-spacing:4px;border-top:1px solid currentColor;padding-top:9px}.wear-title{position:absolute;left:30px;bottom:30px;color:#fff;font:500 31px/1.08 var(--font-display);letter-spacing:1.5px;text-shadow:0 2px 12px #3f2c2799}.wear-title small{display:block;margin-bottom:10px;font:11px var(--font-latin);letter-spacing:4px}.wear-side{position:absolute;right:22px;top:32px;writing-mode:vertical-rl;color:#3f2c27;font:11px var(--font-latin);letter-spacing:5px}.wear-caption{position:absolute;right:28px;bottom:29px;color:#fff;text-align:right;font:11px/1.5 var(--font-latin);letter-spacing:4px;text-shadow:0 2px 10px #3f2c2799}.wear-caption strong{display:block;margin-top:7px;font:500 27px/1 var(--font-display);letter-spacing:1px}
+.attribute-card{display:block;padding:0;background:#fff;border:1px solid rgba(89,68,57,.09);border-radius:28px;box-shadow:0 12px 34px rgba(63,44,39,.07)}
+.attribute-visual{position:relative;min-height:430px;padding:38px 34px 26px;background:#fff;text-align:center;overflow:hidden}
+.attribute-visual:before{content:"";position:absolute;inset:18px;border:1px solid #f0ece9;pointer-events:none}
+.attribute-visual:after{content:"XISHI  ·  OBJECT 02";position:absolute;top:30px;left:32px;color:#8f7769;font:10px var(--font-latin);letter-spacing:4px}
+.measurement-stage{position:relative;z-index:1;width:100%;max-width:600px;height:310px;margin:25px auto 12px}.measurement-stage img{position:absolute;inset:0;width:100%;height:100%;max-height:none;margin:0;object-fit:contain;filter:none;box-shadow:none}.dimension-overlay{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}.dimension-overlay line{stroke:#8c7568;stroke-width:1.5;stroke-dasharray:6 6;vector-effect:non-scaling-stroke}.dimension-overlay .cap{stroke-dasharray:none}.dimension-overlay text{fill:#66534a;font:13px var(--font-latin);letter-spacing:1px}.dimension-overlay .unit{fill:#9a8980;font-size:10px;letter-spacing:2px}
+.measure{position:relative;z-index:1;justify-content:center;gap:10px}.measure span{padding:9px 14px;border:1px solid rgba(105,80,66,.18);border-radius:999px;background:rgba(255,255,255,.62);font-size:13px;color:#6f5d53;letter-spacing:.5px}
+.attribute-copy{padding:34px 34px 28px}.attribute-eyebrow{margin:0 0 8px;color:#9a7b68;font:11px var(--font-latin);letter-spacing:4px}.attribute-name{margin:0;color:#302622;font:500 29px/1.2 var(--font-display);letter-spacing:1px}.attribute-sub{margin:9px 0 27px;color:#8a7970;font-size:14px;letter-spacing:1px}
+.attribute-card dl{display:grid;grid-template-columns:1fr 1fr;gap:0 30px;margin:0}.attribute-card .attr-item{padding:16px 0 15px;border-top:1px solid #e9e1db}.attribute-card dt{margin:0 0 7px;padding:0;background:none;color:#9a8980;font-size:12px;letter-spacing:1.5px}.attribute-card dd{margin:0;padding:0;border:0;color:#3e322d;font-size:16px;line-height:1.45}.attribute-card dd.pending{color:#a69890}
+.attribute-note{margin:27px 0 0;padding:19px 0 0;border-top:1px solid #e9e1db;text-align:left;font-size:12px;line-height:1.7;color:#9a8980}
+.product-showcase{display:grid;gap:16px}.detail-scene{position:relative;margin:0;overflow:hidden;border-radius:24px;background:#e9ddd0;box-shadow:0 8px 24px rgba(63,44,39,.07)}.detail-scene img{display:block;width:100%;height:100%;object-fit:cover}.detail-scene:after{content:"";position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(transparent,rgba(38,26,21,.58));pointer-events:none}.detail-scene figcaption{position:absolute;z-index:1;left:22px;right:22px;bottom:19px;color:#fff}.detail-scene figcaption span{display:block;margin-bottom:6px;font:10px var(--font-latin);letter-spacing:4px;opacity:.86}.detail-scene figcaption strong{font:500 22px/1.15 var(--font-display);letter-spacing:.5px}.detail-hero{aspect-ratio:16/10}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.detail-grid .detail-scene{aspect-ratio:1/1}.detail-gem img,.detail-structure img{transform:none;object-position:center}.variant-feature{position:relative;margin:0;padding:18px;background:#fff;border:1px solid #ebe4df;border-radius:24px;overflow:hidden}.variant-feature img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;object-position:center;border-radius:15px}.variant-feature figcaption{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:16px 4px 3px;color:#493a33}.variant-feature figcaption span{font:10px var(--font-latin);letter-spacing:3px;color:#9a7b68}.variant-feature figcaption strong{font-size:17px;font-weight:500}
+.prototype-note{margin:-4px 0 16px;padding:12px 15px;border-left:2px solid #ad8a75;background:rgba(255,255,255,.54);color:#88746a;font-size:12px;line-height:1.65}
+.service-editorial{margin:30px 0 0;padding:72px 44px 86px;background:#f7f3ee;color:#342824}.service-heading{text-align:center}.service-heading .en{display:block;color:#342824;font:500 34px/1 var(--font-display);letter-spacing:9px}.service-heading h2{margin:14px 0 0;font-size:17px;font-weight:400;letter-spacing:7px}.service-heading:after{content:"";display:block;width:38px;height:1px;margin:24px auto 0;background:#a98a77}.service-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 38px;margin:48px 0 78px;border-top:1px solid #ded4cc}.service-item{display:grid;grid-template-columns:58px 1fr;gap:17px;align-items:center;padding:27px 0;border-bottom:1px solid #ded4cc}.service-icon{width:56px;height:56px;border:1px solid #bda99c;border-radius:50%;display:grid;place-items:center;color:#684f43}.service-icon svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}.service-copy strong{display:block;margin-bottom:5px;font-size:17px;font-weight:500;letter-spacing:1px}.service-copy span{display:block;color:#8a7770;font-size:12px;line-height:1.55}.care-heading{margin-bottom:35px}.care-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.care-item{text-align:center}.care-icon{aspect-ratio:1;border:1px solid #d5c7be;background:rgba(255,255,255,.45);display:grid;place-items:center;color:#684f43}.care-icon svg{width:37px;height:37px;fill:none;stroke:currentColor;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round}.care-item strong{display:block;margin-top:13px;font-size:13px;font-weight:500;letter-spacing:.5px}.care-item span{display:block;margin-top:4px;color:#9a8980;font-size:10px;letter-spacing:1px}.care-note{margin-top:48px;padding-top:27px;border-top:1px solid #d7cbc3}.care-note-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}.care-note-head:before{content:"";width:26px;height:1px;background:#856a5b}.care-note-head span{font:12px var(--font-latin);letter-spacing:4px;color:#856a5b}.care-note h3{margin:0 0 15px;font-size:20px;font-weight:500;letter-spacing:2px}.care-note p{margin:0;color:#695952;font-size:13px;line-height:2}.service-foot{margin-top:42px;text-align:center;color:#a18f85;font:10px var(--font-latin);letter-spacing:4px}
+@media(max-width:540px){.service-editorial{padding:58px 24px 72px}.service-grid{grid-template-columns:1fr;margin-bottom:62px}.care-grid{grid-template-columns:1fr 1fr;gap:22px 13px}.service-heading .en{font-size:28px;letter-spacing:6px}}
+@media(max-width:540px){.attribute-visual{min-height:350px;padding-left:20px;padding-right:20px}.measurement-stage{height:250px}.attribute-copy{padding:28px 24px 24px}.attribute-card dl{grid-template-columns:1fr;gap:0}.attribute-name{font-size:25px}}
+</style>
+<style>
+.care-grid{grid-template-columns:1fr 1fr;gap:14px}
+.care-item{display:grid;grid-template-columns:62px 1fr;align-items:center;gap:15px;min-height:96px;padding:17px 18px;text-align:left;border:1px solid #e2d8d1;border-radius:18px;background:rgba(255,255,255,.58);box-shadow:0 7px 18px rgba(73,52,43,.035)}
+.care-icon{width:58px;height:58px;aspect-ratio:auto;border:0;border-radius:50%;background:linear-gradient(145deg,#eadfd7,#f9f5f1);box-shadow:inset 0 0 0 1px rgba(143,112,94,.18);display:grid;place-items:center;color:#684f43}
+.care-icon{display:flex!important;align-items:center!important;justify-content:center!important;padding:0;line-height:0}
+.care-icon svg{display:block;flex:none;width:30px;height:30px;margin:0;transform:none;stroke-width:2.15!important;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.care-item strong{margin:0;font-size:14px;font-weight:500;letter-spacing:.8px}
+.care-item span{margin-top:6px;font-size:9px;letter-spacing:2px}
+@media(max-width:540px){.care-grid{grid-template-columns:1fr;gap:12px}}
+</style>
+<style>
+/* 750px 淘宝长图排版基准：扩大留白，保证导出后移动端可读 */
+.brand-page{padding-bottom:0;background:#f0ebe7}
+.detail-module{padding:96px 30px 0}
+.module-head{padding:0 16px 34px}
+.module-head .no{font-size:18px;letter-spacing:5px}
+.module-head h2{margin-top:15px;font-size:44px;line-height:1.2;letter-spacing:1px}
+.media-card,.magazine-card,.wear-shot,.attribute-card,.detail-scene,.variant-feature{border-radius:28px}
+.magazine-card{aspect-ratio:3/4}
+.magazine-card>img{width:100%;height:100%;object-fit:cover}
+.wear-grid{gap:30px;margin-top:30px}
+.wear-shot img{aspect-ratio:3/4}
+.mag-logo{font-size:58px}.mag-issue{font-size:16px}.mag-kicker{font-size:17px}
+.mag-coverline small{font-size:16px}.mag-coverline strong{font-size:36px}
+.wear-number{top:34px;left:34px;font-size:16px}
+.wear-title{left:34px;bottom:36px;font-size:36px}.wear-title small{font-size:15px}
+.wear-side{right:27px;top:36px;font-size:15px}.wear-caption{right:34px;bottom:35px;font-size:15px}.wear-caption strong{font-size:32px}
+.attribute-visual{min-height:510px;padding:54px 42px 36px}.attribute-visual:before{inset:24px}.attribute-visual:after{top:38px;left:42px;font-size:15px}
+.measurement-stage{height:355px;margin:32px auto 18px}
+.measure{gap:14px;flex-wrap:wrap}.measure span{padding:11px 18px;font-size:18px}
+.attribute-copy{padding:46px 42px 42px}.attribute-eyebrow{font-size:16px;margin-bottom:12px}.attribute-name{font-size:36px}.attribute-sub{font-size:19px;margin:12px 0 34px}
+.attribute-card dl{gap:0 38px}.attribute-card .attr-item{padding:21px 0 20px}.attribute-card dt{font-size:17px;margin-bottom:9px}.attribute-card dd{font-size:22px}.attribute-note{margin-top:34px;padding-top:24px;font-size:18px;line-height:1.8}
+.prototype-note{margin:0 0 28px;padding:18px 22px;font-size:18px;line-height:1.75}
+.product-showcase{gap:30px}.detail-hero{aspect-ratio:3/4}.detail-grid{grid-template-columns:1fr;gap:30px}.detail-grid .detail-scene{aspect-ratio:3/4}.detail-scene figcaption{left:32px;right:32px;bottom:30px}.detail-scene figcaption span{font-size:15px;margin-bottom:9px}.detail-scene figcaption strong{font-size:30px}
+.variant-feature{padding:24px}.variant-feature img{aspect-ratio:3/2}.variant-feature figcaption{padding:22px 7px 6px}.variant-feature figcaption span{font-size:15px}.variant-feature figcaption strong{font-size:23px}
+.variant-feature{padding:0;overflow:hidden}
+.variant-feature img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:0}
+.variant-feature figcaption{padding:24px 28px 26px}
+.full-image-section{margin-top:90px}
+.full-image-section img{aspect-ratio:1/1;object-fit:cover;object-position:center 52%}
+.full-image-section+.service-editorial{margin-top:0}
+.service-editorial{margin-top:90px;padding:96px 52px 118px}.service-heading .en{font-size:40px;letter-spacing:11px}.service-heading h2{margin-top:18px;font-size:23px}.service-heading:after{margin-top:30px}
+.service-grid{gap:0 46px;margin:58px 0 104px}.service-item{grid-template-columns:68px 1fr;gap:20px;padding:34px 0}.service-icon{width:64px;height:64px}.service-icon svg{width:29px;height:29px;stroke-width:1.8}.service-copy strong{font-size:22px;margin-bottom:8px}.service-copy span{font-size:18px;line-height:1.65}
+.care-heading{margin-bottom:46px}.care-grid{gap:20px}.care-item{grid-template-columns:72px 1fr;gap:19px;min-height:124px;padding:23px 24px;border-radius:22px}.care-icon{width:68px;height:68px}.care-icon svg{width:34px;height:34px}.care-item strong{font-size:20px}.care-item span{font-size:14px;margin-top:8px}
+.care-note{margin-top:64px;padding-top:36px}.care-note-head span{font-size:16px}.care-note h3{font-size:28px;margin-bottom:20px}.care-note p{font-size:20px;line-height:2}.service-foot{margin-top:54px;font-size:14px}
+.brand-footer{margin-top:90px}
+@media(max-width:540px){.detail-module{padding:70px 18px 0}.module-head{padding:0 12px 25px}.module-head h2{font-size:36px}.service-editorial{padding:76px 26px 94px}.service-grid{grid-template-columns:1fr}.care-grid{grid-template-columns:1fr}.attribute-card dl{grid-template-columns:1fr}}
+</style>
+
+<style id="font-variant-override">
+:root{--font-display:"得意黑","Smiley Sans","SmileySans-Oblique","Noto Sans SC","Microsoft YaHei",sans-serif;--variant-note:"C · YOUNG FASHION";}
+/* 字体对比版：保持图片、内容、字号、间距不变，只替换展示标题字体。 */
+</style>
+<style id="c-final-solid-editorial-text">
+/* C方案定稿：英文装饰文字使用与画面匹配的单一实色，不使用阴影、描边、渐变或发光。 */
+.mag-masthead,.mag-kicker,.mag-coverline,.mag-vertical,
+.wear-number,.wear-title,.wear-side,.wear-caption{
+  text-shadow:none;
+  -webkit-text-stroke:0 transparent;
+  background:none;
+  filter:none;
+  opacity:1;
+}
+.mag-kicker,.wear-number{border-top:0;padding-top:0}
+</style>
+<style id="v4-template-overrides">
+@font-face{font-family:"XISHI Sans";src:url("./assets/fonts/NotoSansSC-Regular.otf") format("opentype");font-weight:400;font-style:normal;font-display:block}
+@font-face{font-family:"XISHI Sans";src:url("./assets/fonts/NotoSansSC-Medium.otf") format("opentype");font-weight:500;font-style:normal;font-display:block}
+@font-face{font-family:"XISHI Sans";src:url("./assets/fonts/NotoSansSC-Bold.otf") format("opentype");font-weight:700;font-style:normal;font-display:block}
+@font-face{font-family:"XISHI Display";src:url("./assets/fonts/SmileySans-Oblique.ttf") format("truetype");font-weight:400 700;font-style:normal;font-display:block}
+:root{--font-body:"XISHI Sans","Noto Sans SC","Microsoft YaHei",sans-serif;--font-display:"XISHI Display","得意黑","Smiley Sans","XISHI Sans",sans-serif;--font-latin:"XISHI Sans",Arial,sans-serif}
+/* V4母模板首轮：严格以750px画布检查，不执行窄屏重排。 */
+html,body{min-width:750px}
+body{font-synthesis:none}
+.app{width:750px;max-width:none}
+.brand-hero{height:1000px;position:relative;overflow:hidden;background:none!important}
+.brand-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;display:block}
+.brand-hero .brand-copy,.brand-hero .brand-copy .en,.brand-hero .brand-copy h1,.brand-hero .brand-copy p{color:#725F55!important;background:none!important;text-shadow:none!important;-webkit-text-stroke:0 transparent!important;filter:none!important}
+.brand-hero .brand-copy{left:64px!important;right:auto!important;text-align:left!important}
+.brand-hero .brand-copy p{border-top-color:rgba(114,95,85,.42)!important}
+.service-icon,.care-icon{border:1px solid rgba(128,99,84,.22)!important;border-radius:50%!important;background:#fbf7f2!important;color:#60483d!important;box-shadow:inset 0 0 0 5px rgba(255,255,255,.52)!important}
+.service-icon svg,.care-icon svg{fill:none!important;stroke:currentColor!important;stroke-width:1.45!important;stroke-linecap:round!important;stroke-linejoin:round!important;vector-effect:non-scaling-stroke}
+.service-icon svg{width:31px!important;height:31px!important}
+.care-icon svg{width:33px!important;height:33px!important}
+.magazine-card>img,.wear-shot img{aspect-ratio:3/4;object-fit:cover}
+.attribute-visual{min-height:0!important;padding:30px 34px 36px!important}
+.attribute-visual:before{inset:18px!important}
+.attribute-visual:after{top:28px!important;left:34px!important;font-size:11px!important}
+.measurement-stage{width:82%!important;max-width:510px!important;height:auto!important;aspect-ratio:1/1;margin:24px auto 10px!important}
+.measure{gap:9px!important;margin-bottom:2px!important}
+.measure span{padding:8px 13px!important;font-size:14px!important}
+.attribute-copy{padding:28px 34px 30px!important}
+.attribute-card dl{gap:0 30px!important}
+.attribute-card .attr-item{padding:14px 0 13px!important}
+.attribute-card .attr-item:nth-child(-n+2){border-top:0!important}
+.attribute-card dt{margin-bottom:6px!important;font-size:13px!important}
+.attribute-card dd{font-size:18px!important;line-height:1.4!important}
+.attribute-note{margin-top:20px!important;padding-top:14px!important;font-size:13px!important;line-height:1.65!important}
+.product-showcase .detail-scene,.product-showcase .detail-grid .detail-scene{aspect-ratio:3/4!important}
+.product-showcase .detail-scene>img,.product-showcase .detail-scene>.production-placeholder{position:absolute!important;inset:0!important;display:block;width:100%;height:100%!important;min-height:0;object-fit:cover!important;object-position:center;background:#eee9e4}
+.product-showcase .detail-scene:after{content:none!important;display:none!important}
+.product-showcase .detail-scene figcaption{position:absolute!important;z-index:2;left:34px!important;right:34px!important;bottom:32px!important;padding:0!important;background:none!important;color:#fff!important;text-shadow:none!important;-webkit-text-stroke:0 transparent!important;filter:none!important}
+.product-showcase .detail-scene figcaption:before{content:"";display:block;width:30px;height:1px;margin-bottom:13px;background:rgba(255,255,255,.82)}
+.product-showcase .detail-scene figcaption span,.product-showcase .detail-scene figcaption strong{color:#fff!important;background:none!important;text-shadow:none!important;-webkit-text-stroke:0 transparent!important;filter:none!important}
+.product-showcase .detail-scene figcaption span{display:block;margin:0 0 9px;font:500 10px/1.2 var(--font-latin);letter-spacing:4.2px}
+.product-showcase .detail-scene figcaption strong{display:block;font:500 27px/1.14 var(--font-display);letter-spacing:1px}
+.production-placeholder{display:block;width:100%;height:100%;min-height:100%;position:relative;overflow:hidden;background:#e7ddd4}
+.production-placeholder:before,.production-placeholder:after{content:"";position:absolute;border:1px solid currentColor;border-radius:50%;opacity:.10}
+.production-placeholder:before{width:68%;aspect-ratio:1;left:16%;top:15%}
+.production-placeholder:after{width:44%;aspect-ratio:1;left:28%;top:28%}
+.ph-warm{background:#d6c0ad;color:#3f2c27}.ph-gray{background:#85817f;color:#fff}.ph-dark{background:#49362f;color:#fff}.ph-white{background:#fff;color:#8c7568}
+.packaging-card{position:relative;aspect-ratio:1/1;background:#f6f1eb}
+.packaging-card .detail-img{width:100%;height:100%;aspect-ratio:1/1;object-fit:cover}
+.packaging-overlay{position:absolute;z-index:2;right:34px;bottom:34px;width:270px;display:flex;flex-direction:column;align-items:flex-end;pointer-events:none;color:#fff;text-align:right}
+.packaging-overlay span,.packaging-overlay em{display:block;font:500 9px/1.4 var(--font-latin);font-style:normal;letter-spacing:3.1px}
+.packaging-overlay strong{display:block;margin:8px 0 0;font:500 27px/1.08 var(--font-display);letter-spacing:1.1px}
+.packaging-overlay strong:after{content:"";display:block;width:30px;height:1px;margin:12px 0 10px auto;background:rgba(255,255,255,.82)}
+.full-image-section img{aspect-ratio:3/4!important;object-fit:contain!important;object-position:center!important;background:#eee9e4!important}
+.variant-grid{display:grid;grid-template-columns:1fr;gap:0;width:100%;padding:22px 26px;border:1px solid #e7ddd5;border-radius:28px;background:#fffdf9;box-shadow:0 12px 34px rgba(63,44,39,.07);overflow:hidden}
+.variant-grid .variant-feature{position:relative;min-width:0;margin:0;padding:30px 0;border:0;border-bottom:1px solid #e6ddd6;border-radius:0;background:#fffdf9;box-shadow:none;display:grid;grid-template-columns:42% 58%;align-items:stretch;overflow:hidden}
+.variant-grid .variant-feature:first-child{padding-top:0}
+.variant-grid .variant-feature:last-child{padding-bottom:0;border-bottom:0}
+.variant-media{position:relative;min-height:0;aspect-ratio:1/1;overflow:hidden;border-radius:18px;background:#f4eee8;border:1px solid rgba(143,112,94,.18)}
+.variant-grid .variant-feature img{width:100%;height:100%;aspect-ratio:1/1;object-fit:contain}
+.variant-index{position:absolute;left:18px;top:18px;width:6px;height:6px;border-radius:50%;background:#fff;border:none;box-shadow:none;font-size:0;line-height:0;color:transparent;z-index:2}
+.variant-grid .variant-feature figcaption{position:relative;min-width:0;display:flex;flex-direction:column;justify-content:center;padding:34px 34px 30px 42px;text-align:left}
+.variant-grid .variant-feature figcaption:before{content:"";position:absolute;left:0;top:40px;width:22px;height:1px;background:#b89882}
+.variant-eyebrow{display:block;margin-bottom:16px;color:#9b7a66;font:10px/1.4 var(--font-latin);letter-spacing:4.5px}
+.variant-grid .variant-feature figcaption strong{display:block;color:#342621;font:500 27px/1.35 var(--font-display);letter-spacing:.8px;overflow-wrap:anywhere}
+.variant-grid .variant-feature figcaption p{max-width:270px;margin:14px 0 0;color:#82736b;font-size:14px;line-height:1.85}
+.variant-meta{display:flex;align-items:center;gap:11px;margin-top:25px}
+.variant-meta i{display:block;width:11px;height:11px;border:2px solid #c9aa83;border-radius:50%;background:#fff}
+.variant-feature:nth-child(even) .variant-meta i{border-color:#c8c9cb}
+.variant-meta em{color:#a5968e;font:9px/1 var(--font-latin);font-style:normal;letter-spacing:2.8px}
+.template-reference-note{margin:14px 16px 0;padding:13px 18px;border-radius:14px;background:#fff8ee;color:#8b6d58;font-size:14px;line-height:1.65}
+/* P05 多SKU主图：最终确认版。商品图必须完整保持1:1，禁止裁切和变形。 */
+.p05-slide{background:#f4efea}
+.p05-canvas{width:750px;height:750px;padding:45px 38px 38px;overflow:hidden;background:radial-gradient(circle at 91% 0,rgba(210,183,162,.16),transparent 29%),linear-gradient(145deg,#faf7f4,#f4efea)}
+.p05-heading{display:flex;align-items:flex-end;justify-content:space-between;margin:0 4px 38px}
+.p05-heading h1{margin:0;color:#3f2c27;font:500 32px/1 var(--font-body);letter-spacing:2px}
+.p05-heading span{padding-bottom:2px;color:#a4958d;font:9px/1 Arial,sans-serif;letter-spacing:2.4px}
+.p05-grid{display:grid;grid-template-columns:repeat(2,1fr);column-gap:16px}
+.p05-card{position:relative;display:flex;align-items:center;height:202px;padding:0 14px 0 216px;border:1px solid rgba(83,59,49,.09);border-radius:22px;background:rgba(255,255,255,.96);box-shadow:0 10px 27px rgba(63,44,39,.05);overflow:hidden}
+.p05-media{position:absolute;left:0;top:0;width:202px;height:202px;aspect-ratio:1/1;overflow:hidden;background:#fff}
+.p05-media img{position:absolute;inset:0;display:block;width:100%;height:100%;aspect-ratio:1/1;object-fit:contain;background:#fff}
+.p05-index{position:absolute;left:10px;top:10px;color:#7d665a;font:9px/1 Arial,sans-serif;letter-spacing:2px}
+.p05-copy{width:100%;min-width:0}
+.p05-copy:before{content:"";display:block;width:20px;height:1px;margin-bottom:13px;background:#b79883}
+.p05-copy small{display:block;color:#a28d80;font:8px/1.3 Arial,sans-serif;letter-spacing:1.7px}
+.p05-copy h2{margin:9px 0 0;color:#3f2c27;font:500 17px/1.35 var(--font-body);letter-spacing:.3px;overflow-wrap:anywhere}
+.p05-swatch{display:flex;align-items:center;gap:7px;margin-top:14px;color:#aea19a;font:7px/1 Arial,sans-serif;letter-spacing:1.1px}
+.p05-swatch i{width:9px;height:9px;border:2px solid #c5a16b;border-radius:50%;background:#fff}
+.p05-card:nth-child(even) .p05-swatch i{border-color:#bec1c5}
+.p05-canvas.count-3 .p05-grid,.p05-canvas.count-4 .p05-grid{row-gap:24px}
+.p05-canvas.count-5 .p05-grid,.p05-canvas.count-6 .p05-grid{row-gap:22px;margin-top:12px}
+.p05-canvas.count-5 .p05-heading,.p05-canvas.count-6 .p05-heading{margin-bottom:28px}
+.p05-canvas.count-5 .p05-card,.p05-canvas.count-6 .p05-card{height:176px;padding-left:190px}
+.p05-canvas.count-5 .p05-media,.p05-canvas.count-6 .p05-media{width:176px;height:176px}
+.p05-canvas.count-5 .p05-copy:before,.p05-canvas.count-6 .p05-copy:before{margin-bottom:10px}
+.p05-canvas.count-5 .p05-copy small,.p05-canvas.count-6 .p05-copy small{font-size:7px;letter-spacing:1.3px}
+.p05-canvas.count-5 .p05-copy h2,.p05-canvas.count-6 .p05-copy h2{margin-top:7px;font-size:15px}
+.p05-canvas.count-5 .p05-swatch,.p05-canvas.count-6 .p05-swatch{margin-top:10px}
+.p05-canvas.count-2 .p05-grid{margin-top:44px;column-gap:16px}
+.p05-canvas.count-2 .p05-card{display:block;height:auto;padding:0}
+.p05-canvas.count-2 .p05-media{position:relative;width:100%;height:auto;aspect-ratio:1/1}
+.p05-canvas.count-2 .p05-copy{height:100px;padding:0 24px;display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:18px}
+.p05-canvas.count-2 .p05-copy:before,.p05-canvas.count-2 .p05-copy small{display:none}
+.p05-canvas.count-2 .p05-copy h2{margin:0;font-size:21px}
+.p05-canvas.count-2 .p05-swatch{margin:0;justify-self:end}
+.brand-hero{height:1000px;aspect-ratio:3/4}
+.brand-copy,.brand-copy p{color:#725F55}
+</style>
+</head>
+<body><main class="app" data-template="sku-2" data-sku-count="2">
+<div class="safe"></div><div class="appbar"><button class="round" aria-label="返回"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button><div class="appbar-right"><button class="round" aria-label="搜索"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button><button class="round" aria-label="分享"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.2"/><circle cx="6" cy="12" r="2.2"/><circle cx="18" cy="19" r="2.2"/><path d="m8 11 8-5M8 13l8 5"/></svg></button><button class="round" aria-label="更多"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3" fill="white" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="white" stroke="none"/><circle cx="19" cy="12" r="1.3" fill="white" stroke="none"/></svg></button></div></div>
+
+<section class="gallery"><div class="slides"><div class="slide"><img src="./assets/reference-preview/main-02-scene-brand.png" alt="产品场景主图"></div><div class="slide"><img src="./assets/reference-preview/main-03-wearing-brand.png" alt="模特佩戴主图"></div><div class="slide cover"><img src="./assets/reference-preview/main-01-white-brand.png" alt="白底轻阴影主图"></div><div class="slide" data-slot="SALE-04" data-asset="BOX-01"><img src="./assets/reference-preview/packaging.png" alt="BOX-01 产品装盒共用图"></div><div class="slide p05-slide" data-p05-sku-count="2"><main class="p05-canvas count-2" aria-label="2SKU主图第五张HTML版式"><header class="p05-heading"><h1>同款多色</h1><span>02 COLORS</span></header><section class="p05-grid"><article class="p05-card"><div class="p05-media"><img src="./assets/reference-preview/SKU预览_K金色_纯白底V1.webp" alt="SKU 01 白底母版"><span class="p05-index">01</span></div><div class="p05-copy"><small>PRIMARY</small><h2>配色待确认</h2><div class="p05-swatch"><i></i><span>COLOR 01</span></div></div></article><article class="p05-card"><div class="p05-media"><img src="./assets/reference-preview/SKU预览_银色_纯白底V1.webp" alt="SKU 02 白底母版"><span class="p05-index">02</span></div><div class="p05-copy"><small>COLOR</small><h2>配色待确认</h2><div class="p05-swatch"><i></i><span>COLOR 02</span></div></div></article></section></main></div></div><div class="gallery-dots"><button aria-label="第1张"></button><button class="active" aria-label="第2张"></button><button aria-label="第3张"></button><button aria-label="第4张"></button><button aria-label="第5张"></button></div></section>
+
+<section class="product-info"><div class="price-line"><span class="yen">¥</span><span class="price">98</span><span class="after">限时到手价</span></div><p class="subprice">原价 ¥108</p><h1 class="title"><span class="title-tag">喜饰</span>喜饰设计款珠宝｜日常闪耀首饰</h1><div class="stats"><span>月销 200+</span><span>广东汕尾</span><span>1.2万+人收藏</span></div></section>
+
+<section class="panel"><div class="row"><span class="label">优惠</span><div class="row-main"><span class="coupon">店铺券</span><span class="coupon">满减活动</span><span class="orange">满99减10 · 店铺会员享积分</span></div><span class="arrow">›</span></div><div class="row"><span class="label">保障</span><div class="row-main service-tags"><span>假一赔四</span><span>极速退款</span><span>运费险</span></div><span class="arrow">›</span></div></section>
+
+<section class="panel"><div class="row"><span class="label">选择</span><div class="row-main"><b>颜色分类</b>　SKU以详情页为准</div><span class="arrow">›</span></div><div class="row"><span class="label">配送</span><div class="row-main">配送至：全国大部分地区包邮<br><small class="orange">现货 · 付款后48小时内发出</small></div><span class="arrow">›</span></div><div class="row"><span class="label">参数</span><div class="row-main">品牌、材质、尺寸、工艺</div><span class="arrow">›</span></div></section>
+
+<section class="panel"><div class="review-head"><span>宝贝评价（200+）</span><span class="orange">查看全部 ›</span></div><div class="review-card"><div class="user"><span class="avatar"></span><b>用户评价</b><span class="stars">★★★★★</span></div><p>实物精致有质感，包装也很好看，日常佩戴很亮眼。</p></div></section>
+
+<section class="panel"><div class="shop-head"><span>店铺信息</span><span class="orange">进店逛逛 ›</span></div><div class="shop"><img class="shop-logo" src="./assets/reference-preview/logo-cocoa.png"><div class="shop-name"><strong>喜饰饰品</strong><span>XISHI JEWELRY · 日常与送礼首饰</span></div><span class="shop-btn">关注店铺</span></div></section>
+
+<div class="template-reference-note">750px母模板视觉预览 · 2 SKU · 主图5张 · 当前商品图片仅用于核对既定CSS和页面节奏。</div><nav class="detail-tabs"><a class="active" href="#detail">宝贝详情</a><a href="#spec">规格参数</a><a href="#service">售后保障</a></nav>
+
+<article class="brand-page" id="detail">
+  <section class="brand-hero" data-module="HERO-01" data-asset="HERO-01"><img class="brand-hero-img" src="./assets/reference-preview/hero-detail-brand-v2.jpg" alt="流光相伴-品牌展示图"><div class="brand-copy"><div class="en">LIGHT &amp; FORM</div><h1>流光相伴</h1><p>捕捉光影流转的细腻质感，<br>让纯粹心意，静静融入日常。</p></div></section>
+
+  <section class="detail-module" data-module="MODEL"><div class="module-head"><div class="no">01 / WEARING</div><h2>模特展示</h2></div><div class="magazine-card" data-slot="MODEL-01" data-asset="MODEL-01"><img src="./assets/reference-preview/model-M01-lifestyle.png" alt="这里是商品名称半身场景佩戴"><div class="mag-masthead"><span class="mag-logo">XISHI</span><span class="mag-issue">JEWELRY EDIT<br>ISSUE 01</span></div><div class="mag-kicker">MODERN MUSE</div><div class="mag-coverline"><small>LOVE IN MOTION</small><strong>HEARTS IN<br>EVERYDAY LIGHT</strong></div><div class="mag-vertical">YOUNG · BRIGHT · EXPRESSIVE</div></div><div class="wear-grid"><div class="wear-shot" data-slot="MODEL-02" data-asset="MODEL-02"><img src="./assets/reference-preview/model-M02-earcloseup.png" alt="这里是商品名称耳部近景"><span class="wear-number">02 / DETAIL STUDY</span><strong class="wear-title"><small>PRECISION IN EVERY LINE</small>DOUBLE HEARTS<br>IN FOCUS</strong></div><div class="wear-shot" data-slot="MODEL-03" data-asset="MODEL-03"><img src="./assets/reference-preview/model-M03-sideprofile.png" alt="这里是商品名称银色侧面佩戴"><span class="wear-number">03 / PROFILE</span><span class="wear-side">SILVER · LIGHT · PROFILE</span><span class="wear-caption">XISHI JEWELRY<strong>SCULPTED<br>IN LIGHT</strong></span></div></div></section>
+
+  <section class="detail-module" id="spec"><div class="module-head"><div class="no">02 / ATTRIBUTES</div><h2>产品属性</h2></div><div class="attribute-card"><div class="attribute-visual"><div class="measurement-stage"><img src="./assets/reference-preview/product-white.png" alt="这里是商品名称双色白底图"></div><div class="measure"><span>高度 · 待确认</span><span>宽度 · 待确认</span><span>深度 · 待确认</span></div></div><div class="attribute-copy"><dl><div class="attr-item"><dt>产品货号</dt><dd class="pending">待确认</dd></div><div class="attr-item"><dt>产品配色</dt><dd>这里是已确认的SKU配色</dd></div><div class="attr-item"><dt>主体材质</dt><dd class="pending">待确认</dd></div><div class="attr-item"><dt>镶嵌材质</dt><dd>心形晶石 · 类别待确认</dd></div><div class="attr-item"><dt>佩戴结构</dt><dd>耳圈卡扣 · 材质待确认</dd></div><div class="attr-item"><dt>产品重量</dt><dd class="pending">待确认</dd></div><div class="attr-item"><dt>产品尺寸</dt><dd class="pending">待确认</dd></div><div class="attr-item"><dt>表面工艺</dt><dd>镜面光泽 · 工艺待确认</dd></div></dl><p class="attribute-note">尺寸、重量、材质与镶嵌信息须以供应链或实物测量数据为准。取得正视、正侧视标准素材后，再按轮廓添加尺寸线。</p></div></div></section>
+
+  <section class="detail-module" data-module="DETAILS"><div class="module-head"><div class="no">03 / DETAILS</div><h2>产品展示</h2></div><div class="product-showcase"><figure class="detail-scene detail-hero" data-slot="DETAILS-01" data-asset="DETAILS-01"><img src="./assets/reference-preview/detail-D04-two-color-v1.png" alt="产品展示-双色整体"><figcaption><span>FORM &amp; SILHOUETTE</span><strong>THE SIGNATURE EDIT</strong></figcaption></figure><div class="detail-grid"><figure class="detail-scene detail-gem" data-slot="DETAILS-02" data-asset="DETAILS-02"><img src="./assets/reference-preview/detail-D02-gem-macro-v1.png" alt="产品展示-晶石微距"><figcaption><span>WORN IN LIGHT</span><strong>TRUE PROPORTION</strong></figcaption></figure><figure class="detail-scene detail-structure" data-slot="DETAILS-03" data-asset="DETAILS-03"><img src="./assets/reference-preview/detail-D03-structure-v1.png" alt="产品展示-结构细节"><figcaption><span>SECOND PERSPECTIVE</span><strong>MODERN MUSE</strong></figcaption></figure></div><div class="variant-grid" data-module="DETAIL-SKU" data-sku-count="2"><figure class="variant-feature" data-slot="DETAIL-SKU-01" data-asset="SKU-01"><div class="variant-media"><img src="./assets/reference-preview/source-gold.webp" alt="SKU 01 白底轻阴影母版"><span class="variant-index">01</span></div><figcaption><span class="variant-eyebrow">COLOR VARIATION</span><strong>配色待确认</strong><p>这里是依据视觉事实填写的简短配色说明。</p><div class="variant-meta"><i></i><em>XISHI · EDIT 01</em></div></figcaption></figure><figure class="variant-feature" data-slot="DETAIL-SKU-02" data-asset="SKU-02"><div class="variant-media"><img src="./assets/reference-preview/source-silver.webp" alt="SKU 02 白底轻阴影母版"><span class="variant-index">02</span></div><figcaption><span class="variant-eyebrow">COLOR VARIATION</span><strong>配色待确认</strong><p>这里是依据视觉事实填写的简短配色说明。</p><div class="variant-meta"><i></i><em>XISHI · EDIT 02</em></div></figcaption></figure></div></div></section>
+
+  <section class="detail-module" data-module="BOX-MODULE"><div class="module-head"><div class="no">04 / IN THE BOX</div><h2>产品装盒特写</h2></div><div class="media-card packaging-card" data-slot="BOX-MODULE" data-asset="BOX-01"><img class="detail-img" src="./assets/reference-preview/packaging.png" alt="BOX-01 产品装盒共用图"><div class="packaging-overlay" aria-hidden="true"><span>XISHI JEWELRY</span><strong>IN THE BOX</strong><em>PACKAGED WITH CARE</em></div></div></section>
+
+  <section class="full-image-section"><img src="./assets/reference-preview/PACKAGE-01_包装全家福_3x4.jpg" alt="喜饰完整包装设计 1:1 展示"></section>
+
+  <section class="service-editorial" id="service"><header class="service-heading"><span class="en">SERVICE</span><h2>售后服务</h2></header><div class="service-grid"><article class="service-item"><span class="service-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 17.5 24 10l15 7.5v18L24 43 9 35.5z"/><path d="m9 17.5 15 8 15-8M24 25.5V43M17 13.5l15 8"/></svg></span><div class="service-copy"><strong>全店包邮</strong><span>轻松选购，包邮范围以结算页面为准</span></div></article><article class="service-item"><span class="service-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M35.5 17A14 14 0 1 0 38 30"/><path d="m34 9 2 8-8 2"/><path d="M18 23h12v10H18zM21 23l3-4 3 4"/></svg></span><div class="service-copy"><strong>7天无理由退换</strong><span>符合平台规则及商品完好条件即可申请</span></div></article><article class="service-item"><span class="service-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 20h32v22H8zM6 14h36v8H6zM24 14v28"/><path d="M24 14c-7 0-10-3-10-6 0-2 2-4 5-3 4 1 5 9 5 9Zm0 0c7 0 10-3 10-6 0-2-2-4-5-3-4 1-5 9-5 9Z"/></svg></span><div class="service-copy"><strong>品牌礼盒</strong><span>适合日常收藏，也适合作为礼物呈现</span></div></article><article class="service-item"><span class="service-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 11h28v21H24l-8 7v-7h-6z"/><path d="m20 21 3 3 6-7M35 7v7M31.5 10.5h7"/></svg></span><div class="service-copy"><strong>售后保障</strong><span>官方店铺服务，问题可联系在线客服</span></div></article></div><header class="service-heading care-heading"><span class="en">CARE</span><h2>保养指南</h2></header><div class="care-grid"><article class="care-item"><span class="care-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M18 7h12M20 7v9L12 35a4 4 0 0 0 4 6h16a4 4 0 0 0 4-6l-8-19V7M16 31h16"/><path d="m9 9 30 30"/></svg></span><strong>远离化学品</strong><span>CHEMICALS</span></article><article class="care-item"><span class="care-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="m24 7 12 14-12 20L12 21zM12 21h24M18 21l6 20 6-20"/><path d="m8 8 32 32"/></svg></span><strong>避免刮碰</strong><span>IMPACT</span></article><article class="care-item"><span class="care-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="15" cy="17" r="3.2"/><path d="m19 23 8-8 7 6M7 28c4-3 8-3 12 0s8 3 12 0 8-3 12 0M7 35c4-3 8-3 12 0s8 3 12 0 8-3 12 0"/><path d="m8 8 32 32"/></svg></span><strong>勿运动佩戴</strong><span>SPORT</span></article><article class="care-item"><span class="care-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 7s11 13 11 23a11 11 0 0 1-22 0C13 20 24 7 24 7Z"/><path d="m8 8 32 32"/></svg></span><strong>勿遇水佩戴</strong><span>WATER</span></article></div><div class="care-note"><div class="care-note-head"><span>JEWELRY CARE</span></div><h3>日常保养建议</h3><p>做家务、沐浴、游泳或运动前请取下饰品，避免接触汗液、油污、香水及清洁剂等化学品。不同宝石和金属硬度不同，请单独收纳，避免相互摩擦。佩戴后可使用柔软干布轻拭，并定期检查镶嵌、耳针与开合位置。</p></div><div class="service-foot">XISHI JEWELRY · CARE &amp; SERVICE</div></section>
+
+</article>
+
+<div class="buybar"><div class="mini" aria-label="店铺"><svg viewBox="0 0 24 24"><path d="M3 10h18l-1.4-5H4.4L3 10Z"/><path d="M5 10v9h14v-9M9 19v-5h6v5"/><path d="M3 10c0 1.2 1 2.2 2.2 2.2S7.4 11.2 7.4 10c0 1.2 1 2.2 2.3 2.2S12 11.2 12 10c0 1.2 1 2.2 2.3 2.2s2.3-1 2.3-2.2c0 1.2 1 2.2 2.2 2.2S21 11.2 21 10"/></svg><span>店铺</span></div><div class="mini" aria-label="客服"><svg viewBox="0 0 24 24"><path d="M4 13v-2a8 8 0 0 1 16 0v2"/><path d="M4 13a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2v-2ZM20 13a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2v-2Z"/><path d="M17 19c-1 1-2.8 1.5-5 1.5"/></svg><span>客服</span></div><div class="mini" aria-label="收藏"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg><span>收藏</span></div><button class="cart">加入购物车</button><button class="buy">立即购买</button></div>
+</main>
+<script>
+const slides=document.querySelector('.slides'),dots=[...document.querySelectorAll('.gallery-dots button')];
+function setSlide(i){dots.forEach((d,n)=>d.classList.toggle('active',n===i))}
+slides.addEventListener('scroll',()=>setSlide(Math.round(slides.scrollLeft/slides.clientWidth)));
+dots.forEach((d,i)=>d.addEventListener('click',()=>slides.scrollTo({left:i*slides.clientWidth,behavior:'smooth'})));
+// 默认打开第二张轮播图
+slides.scrollLeft = slides.clientWidth;
+</script></body></html>
+
+
